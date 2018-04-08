@@ -2,34 +2,15 @@ import React, { Component } from 'react';
 import { Helmet } from 'react-helmet';
 import { Grid, Container, Input, Button, Dropdown, Menu, Image, Modal } from 'semantic-ui-react';
 import logo from './images/umbrella-car.svg';
+import feliz from './images/feliz.jpeg';
+import triste from './images/triste.jpeg';
 import { locationsLatLong } from './constants';
 
 const fetch = require('node-fetch');
 
 global.Headers = fetch.Headers;
 
-export const getProbabilities = (name, email, phone, location, date, daysPredict) => (fetch('https://alagatudo.now.sh/predict', {
-  method: 'POST',
-  mode: 'no-cors',
-  headers: new Headers({
-    'Content-Type': 'application/json',
-  }),
-  body: JSON.stringify({
-    date: '2018-04-08T20:30:33.304Z',
-    location: 'butanta',
-    name: 'Cristiano',
-    email: 'cristianochiaramelli@gmail.com'
-  })
-})
-  .then((resj) => {
-    console.log(resj);
-    return resj;
-  })
-  .then(res => res.json())
-  .catch((err) => {
-    console.log(err);
-    return null;
-  }));
+// export const getProbabilities = (name, email, phone, location, date, daysPredict) => ();
 
 
 // fetch('https://alagatudo.now.sh/predict', {
@@ -217,10 +198,12 @@ const locationOptions = [
 class HomePage extends Component {
   state = {
     selectorValue: null,
-    probability: null
+    probability: true,
+    open: false
   }
 
   buttonSubmit = async () => {
+    this.setState({ open: true });
     if (document.getElementById('email')) {
       console.log('dinossauro rex');
       const name = document.getElementById('name');
@@ -228,10 +211,26 @@ class HomePage extends Component {
       const telephone = document.getElementById('telephone');
       const date = document.getElementById('date');
       const predict_days = document.getElementById('predict_days');
-      const response = await getProbabilities(name.value, email.value, telephone.value, locationsLatLong[this.state.selectorValue], date.value, predict_days.value);
-      this.setState({ probability: response });
+      const a = await fetch('https://alagatudo.now.sh/predict', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          date: '2018-04-08T20:30:33.304Z',
+          location: 'butanta',
+          name: 'Cristiano',
+          email: 'cristianochiaramelli@gmail.com'
+        })
+      }).then((res) => {
+        console.log('this is res', res);
+      }).catch((err) => {
+        console.log(err);
+      });
       console.log('olar');
-      console.log(response);
+      console.log(a);
       name.value = '';
       email.value = '';
       telephone.value = '';
@@ -240,38 +239,40 @@ class HomePage extends Component {
     }
   }
 
-  render() {
-    return (
-      <div>
-        <Helmet
-          title="ClassApp"
-          meta={[
+   close = () => this.setState({ open: false })
+
+   render() {
+     return (
+       <div>
+         <Helmet
+           title="ClassApp"
+           meta={[
           { name: 'description', content: 'Sample' },
           { name: 'keywords', content: 'sample, something' },
         ]}
-          link={[
+           link={[
           { rel: 'stylesheet', href: '//assets.classapp.co/semantic/semantic.min.css' },
         ]}
-        />
-        <div>
-          <Menu style={{ height: '72px', margin: '0px', boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)' }} borderless>
-            <Menu.Item style={{ margin: '0px auto' }} vericalAlign="middle">
-              <Image src={logo} style={{ margin: 'auto 4px' }} size="mini" />
-              <h2 style={{ color: '#1e5799', margin: '16px 4px 0px' }}>AlagaChuber</h2>
-            </Menu.Item>
-          </Menu>
-          <div style={{
+         />
+         <div>
+           <Menu style={{ height: '72px', margin: '0px', boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)' }} borderless>
+             <Menu.Item style={{ margin: '0px auto' }} vericalAlign="middle">
+               <Image src={logo} style={{ margin: 'auto 4px' }} size="mini" />
+               <h2 style={{ color: '#1e5799', margin: '16px 4px 0px' }}>AlagaChuber</h2>
+             </Menu.Item>
+           </Menu>
+           <div style={{
  background: 'linear-gradient(to right bottom, #1e5799 0%,#7db9e8 100%)', height: '700px', display: 'flex', justifyContent: 'center', flexDirection: 'column'
 }}
-          >
-            <Container textAlign="center">
-              <Container text>
-                <h2 style={{ color: '#ffffff', marginBottom: '32px' }}>Olá jovem forasteiro, o AlagaChuber é uma plataforma que permite você saber se as ruas da sua região irão alagar hoje.</h2>
-                <p style={{ color: '#ffffff', marginBottom: '64px' }}>Preencha o formulário abaixo e receba as informações diariamente no seu celular ou email. E sempre que quiser pode acessar e consultar a probabilidade</p>
-              </Container>
-              <Grid stackable>
-                <Grid.Row columns={2} textAlign="center">
-                  {sectionForms.map((field) => {
+           >
+             <Container textAlign="center">
+               <Container text>
+                 <h2 style={{ color: '#ffffff', marginBottom: '32px' }}>Olá jovem forasteiro, o AlagaChuber é uma plataforma que permite você saber se as ruas da sua região irão alagar hoje.</h2>
+                 <p style={{ color: '#ffffff', marginBottom: '64px' }}>Preencha o formulário abaixo e receba as informações diariamente no seu celular ou email. E sempre que quiser pode acessar e consultar a probabilidade</p>
+               </Container>
+               <Grid stackable>
+                 <Grid.Row columns={2} textAlign="center">
+                   {sectionForms.map((field) => {
                   if (field.type === 'Text') {
                     return (
                       <Grid.Column style={{ padding: '16px 0px' }}>
@@ -285,29 +286,51 @@ class HomePage extends Component {
                   }
                     return null;
                 })}
-                </Grid.Row>
-                <Modal trigger={
-                  <Button
-                    circular
-                    onClick={this.buttonSubmit}
-                    style={{
+                 </Grid.Row>
+                 <Modal
+                   open={this.state.open}
+                   onClose={this.close}
+                   trigger={
+                     <Button
+                       circular
+                       onClick={this.buttonSubmit}
+                       style={{
 backgroundColor: '#1e5799', height: '48px', margin: '0px auto', marginTop: '32px', color: '#ffffff', width: '200px'
 }}
-                  >Confirmar
-                  </Button>
+                     >Confirmar
+                     </Button>
                 }
-                >
-                  <Modal.Content>
-                    <p>{this.state.probability}</p>
-                  </Modal.Content>
-                </Modal>
-              </Grid>
-            </Container>
-          </div>
-        </div>
-      </div>
-    );
-  }
+                 >
+                   <Modal.Content>
+                     <div style={{ textAlign: 'center' }}>
+                       {!!this.state.probability &&
+                       <div>
+                         <Image src={feliz} style={{ margin: '32px auto' }} />
+                         <p>BIIIRL!!! Hoje não haverão enchentes na sua região</p>
+                       </div>}
+                       {!this.state.probability &&
+                       <div>
+                         <Image src={triste} style={{ margin: '32px auto' }} />
+                         <h2>NÃO VAI DA NÃO!!! Sua região tem altas chances de alagar</h2>
+                       </div>}
+                       <Button
+                         style={{
+  backgroundColor: '#1e5799', height: '48px', margin: '0px auto', marginTop: '32px', color: '#ffffff', width: '100px'
+  }}
+                         onClick={() => this.setState({ open: false })}
+                         circular
+                       >OK
+                       </Button>
+                     </div>
+                   </Modal.Content>
+                 </Modal>
+               </Grid>
+             </Container>
+           </div>
+         </div>
+       </div>
+     );
+   }
 }
 
 export default HomePage;
